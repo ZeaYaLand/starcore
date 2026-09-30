@@ -1,6 +1,6 @@
 import pytest
 
-from game.inventory import Inventory
+from game.inventory import Inventory, InventoryItem
 
 
 def test_credits_cannot_go_negative():
@@ -58,3 +58,25 @@ def test_removing_last_equipped_item_clears_equipment():
     inventory.equip("blade", "weapon")
     assert inventory.remove_item("blade") is True
     assert inventory.equipped == {}
+
+
+def test_stage_46_item_definition_supports_rarity_stats_and_durability():
+    inventory = Inventory()
+    blade = InventoryItem(
+        "blade", "Star Blade", category="weapon", max_stack=1,
+        rarity="epic", power=25, durability=40, max_durability=50,
+        stats={"attack": 10, "agility": 2},
+    )
+    inventory.register_item(blade)
+    inventory.add_item("blade")
+    assert inventory.get_item("blade").rarity == "epic"
+    assert inventory.get_item("blade").stats["attack"] == 10
+    assert inventory.repair("blade", 20) == 10
+    assert inventory.get_item("blade").durability == 50
+
+
+def test_stage_46_rejects_invalid_item_definition():
+    with pytest.raises(ValueError):
+        InventoryItem("bad", "Bad", max_stack=0)
+    with pytest.raises(ValueError):
+        InventoryItem("bad", "Bad", durability=10, max_durability=5)

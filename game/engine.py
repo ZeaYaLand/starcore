@@ -1,8 +1,6 @@
 from dataclasses import dataclass
 from random import Random
 
-from services.player_service import PlayerService
-
 
 @dataclass(frozen=True)
 class ExploreResult:
@@ -15,7 +13,14 @@ class ExploreResult:
 
 
 class GameEngine:
-    def __init__(self, player_service: PlayerService, rng: Random | None = None):
+    """Pure game-layer exploration logic.
+
+    The XP service is injected so the engine does not depend on a concrete
+    database service implementation. This keeps the game layer testable and
+    avoids coupling it to SQLAlchemy/session details.
+    """
+
+    def __init__(self, player_service, rng: Random | None = None):
         self.player_service = player_service
         self.rng = rng or Random()
 

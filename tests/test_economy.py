@@ -29,3 +29,23 @@ def test_negative_resource_changes_are_rejected():
         economy.add(Reward(credits=-1))
     with pytest.raises(ValueError):
         economy.spend(crystals=-1)
+
+
+def test_economy_2_records_transaction_history():
+    economy = EconomyService(Wallet(credits=100, crystals=5))
+    economy.add(Reward(credits=25, crystals=1))
+    economy.spend(credits=10, crystals=2)
+    history = economy.transaction_history()
+    assert [item.kind for item in history] == ["add", "spend"]
+    assert history[0].balance_after == Wallet(credits=125, crystals=6)
+    assert history[1].balance_after == Wallet(credits=115, crystals=4)
+    assert history[1].credits == -10
+    assert history[1].crystals == -2
+
+
+def test_transaction_history_is_read_only_view():
+    economy = EconomyService()
+    economy.add(Reward(credits=1))
+    history = economy.transaction_history()
+    assert isinstance(history, tuple)
+    assert len(history) == 1

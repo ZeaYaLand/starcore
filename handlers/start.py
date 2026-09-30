@@ -3,6 +3,7 @@ from telegram.ext import ContextTypes
 
 from database.database import SessionLocal
 from services.player_service import get_or_create_player
+from handlers.menu import main_menu_keyboard
 
 
 async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -20,5 +21,6 @@ async def start(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         f"🪙 Кредиты: {player.credits}\n"
         f"💎 Кристаллы: {player.crystals}\n"
         f"⚡ Энергия: {player.energy}\n\n"
-        "Это Stage 0. Игровой мир будет постепенно расширяться."
+        "Выберите раздел в меню ниже.",
+        reply_markup=main_menu_keyboard(),
     )

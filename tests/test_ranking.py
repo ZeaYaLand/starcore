@@ -8,12 +8,12 @@ def test_ranking_orders_by_score_then_player_id():
     ranking.register("p2", 100)
     ranking.register("p1", 200)
     ranking.register("p3", 100)
-    assert ranking.leaderboard() == (
-        ranking.leaderboard()[0],
-        ranking.leaderboard()[1],
-        ranking.leaderboard()[2],
-    )
-    assert [entry.player_id for entry in ranking.leaderboard()] == ["p1", "p2", "p3"]
+    entries = ranking.leaderboard()
+    assert [(entry.player_id, entry.score) for entry in entries] == [
+        ("p1", 200),
+        ("p2", 100),
+        ("p3", 100),
+    ]
 
 
 def test_add_score_and_rank():
@@ -21,9 +21,10 @@ def test_add_score_and_rank():
     ranking.register("p1", 10)
     ranking.register("p2", 20)
     ranking.register("p3", 30)
-    ranking.add_score("p1", 25)
+    updated = ranking.add_score("p1", 25)
+    assert updated == ranking.leaderboard()[1]
     assert ranking.rank_of("p1") == 2
-    assert ranking.leaderboard(limit=2)[0].player_id == "p3"
+    assert [entry.player_id for entry in ranking.leaderboard(limit=2)] == ["p3", "p1"]
 
 
 def test_validation():
@@ -34,6 +35,12 @@ def test_validation():
         ranking.register("p1", -1)
     ranking.register("p1")
     with pytest.raises(ValueError):
+        ranking.register("p1")
+    with pytest.raises(ValueError):
         ranking.add_score("p1", -1)
     with pytest.raises(KeyError):
+        ranking.add_score("missing", 1)
+    with pytest.raises(KeyError):
         ranking.rank_of("missing")
+    with pytest.raises(ValueError):
+        ranking.leaderboard(limit=0)

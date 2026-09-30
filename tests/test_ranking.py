@@ -22,9 +22,10 @@ def test_add_score_and_rank():
     ranking.register("p2", 20)
     ranking.register("p3", 30)
     updated = ranking.add_score("p1", 25)
-    assert updated == ranking.leaderboard()[1]
-    assert ranking.rank_of("p1") == 2
-    assert [entry.player_id for entry in ranking.leaderboard(limit=2)] == ["p3", "p1"]
+    assert updated.player_id == "p1"
+    assert updated.score == 35
+    assert ranking.rank_of("p1") == 1
+    assert [entry.player_id for entry in ranking.leaderboard(limit=2)] == ["p1", "p3"]
 
 
 def test_validation():

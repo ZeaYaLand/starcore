@@ -31,3 +31,30 @@ def test_negative_currency_is_rejected():
         inventory.add_credits(-1)
     with pytest.raises(ValueError):
         inventory.add_crystals(-1)
+
+
+def test_inventory_capacity_and_stack_limit():
+    inventory = Inventory(capacity=1)
+    inventory.add_item("ore", 3, max_stack=5)
+    inventory.add_item("ore", 2, max_stack=5)
+    with pytest.raises(ValueError):
+        inventory.add_item("wood")
+    with pytest.raises(ValueError):
+        inventory.add_item("ore", 1, max_stack=5)
+
+
+def test_equipment_can_be_equipped_and_unequipped():
+    inventory = Inventory()
+    inventory.add_item("blade")
+    inventory.equip("blade", "weapon")
+    assert inventory.equipped["weapon"] == "blade"
+    assert inventory.unequip("weapon") == "blade"
+    assert inventory.unequip("weapon") is None
+
+
+def test_removing_last_equipped_item_clears_equipment():
+    inventory = Inventory()
+    inventory.add_item("blade")
+    inventory.equip("blade", "weapon")
+    assert inventory.remove_item("blade") is True
+    assert inventory.equipped == {}

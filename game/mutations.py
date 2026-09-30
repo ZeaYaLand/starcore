@@ -25,9 +25,9 @@ MUTATIONS = (
 
 def apply_mutation(genome: Genome, mutation: Mutation) -> Genome:
     return Genome(
-        strength=max(0, genome.strength + mutation.strength_delta),
-        vitality=max(0, genome.vitality + mutation.vitality_delta),
-        agility=max(0, genome.agility + mutation.agility_delta),
+        strength=max(1, genome.strength + mutation.strength_delta),
+        vitality=max(1, genome.vitality + mutation.vitality_delta),
+        agility=max(1, genome.agility + mutation.agility_delta),
     )
 
 

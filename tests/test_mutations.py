@@ -15,11 +15,12 @@ def test_positive_mutation_changes_genome():
     assert mutated.agility == 3
 
 
-def test_negative_delta_never_makes_stat_negative():
-    genome = Genome(strength=1, vitality=0, agility=1)
+def test_negative_delta_respects_genome_minimum():
+    genome = Genome(strength=1, vitality=1, agility=1)
     mutation = next(m for m in MUTATIONS if m.mutation_id == "unstable_growth")
     mutated = apply_mutation(genome, mutation)
-    assert mutated.vitality == 0
+    assert mutated.vitality == 1
+    assert mutated.strength == 4
 
 
 def test_seeded_generator_is_reproducible():

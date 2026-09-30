@@ -8,7 +8,12 @@ MAX_ENERGY = 100
 
 
 def xp_required_for_level(level: int) -> int:
-    return XP_PER_LEVEL * max(level, 1)
+    """Return the XP required to advance from the given level.
+
+    STARCORE currently uses a fixed progression cost so large XP rewards can
+    correctly advance a player through multiple levels in one operation.
+    """
+    return XP_PER_LEVEL
 
 
 def get_or_create_player(session, telegram_id: int, username: str | None) -> Player:

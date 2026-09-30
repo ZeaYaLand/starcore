@@ -1,41 +1,46 @@
 from dataclasses import dataclass
 from random import Random
 
+from game.events import EventService
+from game.locations import get_location
+
 
 @dataclass(frozen=True)
 class ExploreResult:
     success: bool
     message: str
+    location_id: str | None
     credits: int
     crystals: int
     energy_spent: int
     xp: int
+    event_id: str | None = None
 
 
 class GameEngine:
-    """Pure game-layer exploration logic.
+    """Game-layer exploration logic with location-specific events."""
 
-    The XP service is injected so the engine does not depend on a concrete
-    database service implementation. This keeps the game layer testable and
-    avoids coupling it to SQLAlchemy/session details.
-    """
-
-    def __init__(self, player_service, rng: Random | None = None):
+    def __init__(self, player_service, event_service=None, rng: Random | None = None):
         self.player_service = player_service
         self.rng = rng or Random()
+        self.event_service = event_service or EventService(self.rng)
 
-    def explore(self, player, energy_cost: int = 10) -> ExploreResult:
-        if energy_cost <= 0:
-            raise ValueError("energy_cost must be positive")
+    def explore(self, player, energy_cost: int = 10, location_id: str = "ruins") -> ExploreResult:
+        location = get_location(location_id)
+        if location is None:
+            return ExploreResult(False, "Unknown location", None, 0, 0, 0, 0, None)
+
+        energy_cost = location.energy_cost
         if player.energy < energy_cost:
-            return ExploreResult(False, "Not enough energy", 0, 0, 0, 0)
+            return ExploreResult(False, "Not enough energy", location.location_id, 0, 0, 0, 0, None)
 
         player.energy -= energy_cost
-        credits = self.rng.randint(10, 40)
-        crystals = 1 if self.rng.random() < 0.20 else 0
-        xp = self.rng.randint(5, 15)
-        levels = self.player_service.add_xp(player, xp)
-        message = "Exploration complete"
-        if levels:
-            message += f". Level up: +{levels}"
-        return ExploreResult(True, message, credits, crystals, energy_cost, xp)
+        event = self.event_service.event_for_location(location.location_id)
+        credits = event.credits
+        crystals = event.crystals
+        xp = event.xp
+        if event.energy_change:
+            player.energy = max(0, player.energy + event.energy_change)
+
+        self.player_service.add_xp(player, xp)
+        return ExploreResult(True, event.title, location.location_id, credits, crystals, energy_cost, xp, event.event_id)

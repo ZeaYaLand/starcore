@@ -9,36 +9,43 @@ class ShopItem:
     price: int
     currency: str = "credits"
     quantity: int = 1
+    sell_price: int | None = None
 
 
 SHOP = {
-    "ore": ShopItem("ore", 25),
-    "medkit": ShopItem("medkit", 75),
-    "quantum_core": ShopItem("quantum_core", 2, "crystals"),
+    "ore": ShopItem("ore", 25, sell_price=10),
+    "medkit": ShopItem("medkit", 75, sell_price=30),
+    "quantum_core": ShopItem("quantum_core", 2, "crystals", sell_price=1),
 }
 
 
 class ShopService:
-    def buy(self, inventory: Inventory, item_id: str) -> bool:
+    def buy(self, inventory: Inventory, item_id: str, quantity: int = 1) -> bool:
         item = SHOP.get(item_id)
-        if item is None:
+        if item is None or quantity <= 0:
             return False
+        if item.price < 0 or item.quantity <= 0:
+            return False
+        total = item.price * quantity
         if item.currency == "credits":
-            if not inventory.spend_credits(item.price):
+            if not inventory.spend_credits(total):
                 return False
         elif item.currency == "crystals":
-            if inventory.crystals < item.price:
+            if inventory.crystals < total:
                 return False
-            inventory.crystals -= item.price
+            inventory.crystals -= total
         else:
             return False
-        inventory.add_item(item.item_id, item.quantity)
+        inventory.add_item(item.item_id, item.quantity * quantity)
         return True
 
-    def sell(self, inventory: Inventory, item_id: str, price: int) -> bool:
-        if price < 0:
-            raise ValueError("price must be non-negative")
-        if not inventory.remove_item(item_id):
+    def sell(self, inventory: Inventory, item_id: str, quantity: int = 1) -> bool:
+        item = SHOP.get(item_id)
+        if item is None or quantity <= 0:
             return False
-        inventory.add_credits(price)
+        if item.sell_price is None or item.sell_price < 0:
+            return False
+        if not inventory.remove_item(item_id, quantity):
+            return False
+        inventory.add_credits(item.sell_price * quantity)
         return True

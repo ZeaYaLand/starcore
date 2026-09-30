@@ -21,8 +21,7 @@ class GameEngine:
     """Game-layer exploration logic with location-specific events."""
 
     def __init__(self, player_service, event_service=None, rng: Random | None = None):
-        # Keep the Stage 2 constructor compatible: GameEngine(service, Random(...))
-        # historically used the second positional argument as the RNG.
+        # Preserve the Stage 2 constructor: GameEngine(service, Random(...)).
         if isinstance(event_service, Random) and rng is None:
             rng = event_service
             event_service = None
@@ -31,6 +30,9 @@ class GameEngine:
         self.event_service = event_service or EventService(self.rng)
 
     def explore(self, player, energy_cost: int = 10, location_id: str = "ruins") -> ExploreResult:
+        if energy_cost <= 0:
+            raise ValueError("energy_cost must be positive")
+
         location = get_location(location_id)
         if location is None:
             return ExploreResult(False, "Unknown location", None, 0, 0, 0, 0, None)

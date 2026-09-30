@@ -8,6 +8,7 @@ class Combatant:
     health: int
     attack: int
     defense: int = 0
+    energy: int = 0
 
     @property
     def alive(self) -> bool:
@@ -20,6 +21,7 @@ class CombatResult:
     rounds: int
     damage_dealt: int
     damage_taken: int
+    energy_spent: int = 0
 
 
 class CombatService:
@@ -29,6 +31,14 @@ class CombatService:
     def _damage(self, attacker: Combatant, defender: Combatant) -> int:
         base = max(1, attacker.attack - defender.defense)
         return self.rng.randint(max(1, base - 1), base + 1)
+
+    def use_ability(self, attacker: Combatant, defender: Combatant, damage: int, energy_cost: int) -> int:
+        if damage <= 0 or energy_cost < 0 or attacker.energy < energy_cost or not defender.alive:
+            return 0
+        attacker.energy -= energy_cost
+        dealt = min(defender.health, damage)
+        defender.health -= dealt
+        return dealt
 
     def fight(self, player: Combatant, enemy: Combatant) -> CombatResult:
         damage_dealt = 0

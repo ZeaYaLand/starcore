@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from random import Random
 
 from game.genome import Genome
-from game.mutations import MutationGenerator, apply_mutation
+from game.mutations import MutationGenerator, apply_mutation, combine_genomes
 
 
 @dataclass(frozen=True)
@@ -17,16 +17,17 @@ class BreedingService:
         self.rng = rng or Random()
         self.mutations = MutationGenerator(self.rng)
 
-    def breed(self, parent_a: Organism, parent_b: Organism, mutation_chance: float = 0.05) -> Organism:
+    def breed(self, parent_a: Organism, parent_b: Organism, mutation_chance: float = 0.05, combination_chance: float = 0.10) -> Organism:
         if not 0 <= mutation_chance <= 1:
             raise ValueError("mutation_chance must be between 0 and 1")
-        genome = Genome(
-            strength=self.rng.choice((parent_a.genome.strength, parent_b.genome.strength)),
-            vitality=self.rng.choice((parent_a.genome.vitality, parent_b.genome.vitality)),
-            agility=self.rng.choice((parent_a.genome.agility, parent_b.genome.agility)),
-        )
+        if not 0 <= combination_chance <= 1:
+            raise ValueError("combination_chance must be between 0 and 1")
+        genome = combine_genomes(parent_a.genome, parent_b.genome)
         if self.rng.random() < mutation_chance:
             genome = apply_mutation(genome, self.mutations.roll())
+        combo = self.mutations.roll_combination(combination_chance)
+        if combo is not None:
+            genome = apply_mutation(genome, combo)
         return Organism(
             organism_id=f"{parent_a.organism_id}-{parent_b.organism_id}-{self.rng.randrange(1_000_000)}",
             generation=max(parent_a.generation, parent_b.generation) + 1,

@@ -9,6 +9,8 @@ class Quest:
     title: str
     target: int
     reward: Reward
+    objective_type: str = "generic"
+    min_danger: int = 0
 
 
 @dataclass(frozen=True)
@@ -33,6 +35,15 @@ class QuestService:
         self.progress[quest_id] = current
         return self.status(quest_id)
 
+    def record_event(self, objective_type: str, amount: int = 1, danger: int = 0) -> tuple[QuestProgress, ...]:
+        if amount <= 0:
+            raise ValueError("amount must be positive")
+        updated = []
+        for quest in self.quests.values():
+            if quest.objective_type == objective_type and danger >= quest.min_danger:
+                updated.append(self.advance(quest.quest_id, amount))
+        return tuple(updated)
+
     def status(self, quest_id: str) -> QuestProgress:
         quest = self.quests[quest_id]
         current = self.progress.get(quest_id, 0)
@@ -47,6 +58,8 @@ class QuestService:
 
 
 DEFAULT_QUESTS = (
-    Quest("explore_3", "Explore 3 times", 3, Reward(xp=30, credits=100)),
-    Quest("win_2", "Win 2 battles", 2, Reward(xp=50, credits=150, crystals=1)),
+    Quest("explore_3", "Explore 3 times", 3, Reward(xp=30, credits=100), "explore"),
+    Quest("danger_2", "Survive 2 dangerous expeditions", 2, Reward(xp=60, credits=180), "explore", min_danger=2),
+    Quest("win_2", "Win 2 battles", 2, Reward(xp=50, credits=150, crystals=1), "battle"),
+    Quest("breed_2", "Create 2 offspring", 2, Reward(xp=70, credits=120), "breed"),
 )

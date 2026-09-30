@@ -21,3 +21,5 @@ jobs:
         env:
           PYTHONPATH: ${{ github.workspace }}
         run: pytest -q
+
+# CI trigger for Stage 53 test verification

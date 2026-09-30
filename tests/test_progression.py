@@ -8,6 +8,7 @@ from services.player_service import (
     spend_energy,
     xp_required_for_level,
 )
+from game.progression import ProgressionService
 
 
 def setup_function():
@@ -64,3 +65,19 @@ def test_negative_progression_is_rejected():
             add_credits(session, player, -1)
         with pytest.raises(ValueError):
             spend_energy(session, player, -1)
+
+
+def test_stage_45_progression_service_levels_and_grants_skill_points():
+    service = ProgressionService()
+    progress = service.add_experience("stage45", 100)
+    assert progress.level == 2
+    assert progress.experience == 0
+    assert progress.skill_points == 1
+
+
+def test_stage_45_progression_handles_multiple_levels():
+    service = ProgressionService()
+    progress = service.add_experience("stage45_multi", 300)
+    assert progress.level == 3
+    assert progress.experience == 0
+    assert progress.skill_points == 2

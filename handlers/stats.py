@@ -19,18 +19,19 @@ async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         data = build_statistics(player, profile)
 
         await message.reply_text(
-            "📊 СТАТИСТИКА STARCORE\n\n"
-            "📈 ПРОГРЕСС\n"
+            "📊 АНАЛИТИКА STARCORE\n\n"
+            "🚀 ПРОГРЕСС\n"
             f"🏆 Уровень: {data['level']}\n"
             f"✨ XP: {data['xp']}/{data['xp_required']}\n"
-            f"📊 Прогресс уровня: {data['xp_progress_percent']:.0f}%\n\n"
-            "💰 ЭКОНОМИКА\n"
+            f"📈 Заполнение уровня: {data['xp_progress_percent']:.0f}%\n\n"
+            "⚡ РЕСУРСЫ\n"
             f"🪙 Кредиты: {data['credits']}\n"
             f"💎 Кристаллы: {data['crystals']}\n"
             f"⚡ Энергия: {data['energy']}/{data['max_energy']}\n\n"
-            "⚔️ ПОТЕНЦИАЛ\n"
-            f"⚔️ Сумма характеристик: {data['total_attributes']}\n\n"
-            "📦 КОЛЛЕКЦИЯ\n"
-            f"🏅 Достижений открыто: {data['achievements_unlocked']}\n"
-            f"🎒 Предметов собрано: {data['inventory_items']}"
+            "🧠 БОЕВОЙ ПОТЕНЦИАЛ\n"
+            f"💪 Сумма характеристик: {data['total_attributes']}\n"
+            f"🏅 Открыто достижений: {data['achievements_unlocked']}\n\n"
+            "🎒 КОЛЛЕКЦИОННЫЙ ПРОГРЕСС\n"
+            f"📦 Предметов собрано: {data['inventory_items']}\n\n"
+            "📡 Этот раздел показывает динамику развития и ресурсы, а не описание твоего организма."
         )

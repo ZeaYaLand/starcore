@@ -2,7 +2,7 @@ from handlers.menu import MENU_BUTTONS, main_menu_keyboard
 
 
 def test_stage54_menu_has_expected_navigation_buttons():
-    buttons = [button for row in MENU_BUTTONS for button in row]
+    buttons = [text for row in MENU_BUTTONS for text, _ in row]
     assert buttons == [
         "🧬 Профиль",
         "🎮 Играть",
@@ -14,16 +14,18 @@ def test_stage54_menu_has_expected_navigation_buttons():
     assert len(buttons) == len(set(buttons))
 
 
-def test_stage54_keyboard_is_resizable_and_persistent():
+def test_stage54_inline_keyboard_has_navigation_callbacks():
     keyboard = main_menu_keyboard()
-    assert keyboard.resize_keyboard is True
-    assert keyboard.is_persistent is True
-    assert keyboard.input_field_placeholder == "Выберите раздел STARCORE"
-    assert [[button.text for button in row] for row in keyboard.keyboard] == [
+    assert [[button.text for button in row] for row in keyboard.inline_keyboard] == [
         ["🧬 Профиль", "🎮 Играть"],
         ["📊 Статистика", "🔔 Уведомления"],
         ["ℹ️ Помощь", "❌ Скрыть меню"],
     ]
+    assert [[button.callback_data for button in row] for row in keyboard.inline_keyboard] == [
+        ["menu:profile", "menu:play"],
+        ["menu:stats", "menu:notifications"],
+        ["menu:help", "menu:hide"],
+    ]
 
 
-# Stage 54 CI verification: these tests intentionally exercise the real menu builder.
+# Stage 54 CI verification: exercise the real inline menu builder and its callbacks.

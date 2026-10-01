@@ -3,9 +3,12 @@ from telegram.ext import ContextTypes
 
 
 MENU_BUTTONS = (
-    (("🧬 Профиль", "menu:profile"), ("🎮 Играть", "menu:play")),
-    (("📊 Статистика", "menu:stats"), ("🔔 Уведомления", "menu:notifications")),
-    (("ℹ️ Помощь", "menu:help"), ("❌ Скрыть меню", "menu:hide")),
+    (("🧬 Профиль", "menu:profile"), ("🎮 Играть", "menu:play"), ("📊 Статистика", "menu:stats")),
+    (("🎒 Инвентарь", "section:inventory"), ("🎯 Миссии", "section:missions"), ("🏆 Достижения", "section:achievements")),
+    (("🏅 Рейтинг", "section:ranking"), ("👥 Сообщество", "section:social"), ("🛡 Гильдия", "section:guild")),
+    (("💱 Торговля", "section:trading"), ("🛒 Магазин", "section:shop"), ("🌌 Системы", "section:systems")),
+    (("🔔 Уведомления", "menu:notifications"), ("ℹ️ Помощь", "menu:help"), ("🧩 Все разделы", "section:all")),
+    (("❌ Скрыть меню", "menu:hide"),),
 )
 
 
@@ -23,7 +26,7 @@ async def menu(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if message is None:
         return
     await message.reply_text(
-        "🎮 Главное меню STARCORE\n\nВыберите нужный раздел:",
+        "🎮 Главное меню STARCORE\n\nВыберите раздел:",
         reply_markup=main_menu_keyboard(),
     )
 

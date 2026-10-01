@@ -8,7 +8,8 @@ from services.profile_service import get_or_create_profile, profile_data
 
 async def profile(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
-    if user is None or update.message is None:
+    message = update.effective_message
+    if user is None or message is None:
         return
 
     with SessionLocal() as session:
@@ -20,7 +21,7 @@ async def profile(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         achievements = data["achievements"]
         inventory = data["inventory"]
 
-        await update.message.reply_text(
+        await message.reply_text(
             "🧬 ТВОЙ STARCORE ПРОФИЛЬ\n\n"
             f"👤 @{player.username or 'unknown'}\n"
             f"🧫 Организм: {data['organism']}\n"

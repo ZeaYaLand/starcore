@@ -9,7 +9,8 @@ from services.statistics_service import build_statistics
 
 async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     user = update.effective_user
-    if user is None or update.message is None:
+    message = update.effective_message
+    if user is None or message is None:
         return
 
     with SessionLocal() as session:
@@ -17,7 +18,7 @@ async def stats(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
         profile = get_or_create_profile(session, player.id)
         data = build_statistics(player, profile)
 
-        await update.message.reply_text(
+        await message.reply_text(
             "📊 СТАТИСТИКА STARCORE\n\n"
             f"🏆 Уровень: {data['level']}\n"
             f"✨ XP: {data['xp']}/{data['xp_required']} ({data['xp_progress_percent']:.0f}%)\n"

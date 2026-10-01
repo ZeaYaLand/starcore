@@ -2,6 +2,29 @@
 
 Telegram game with exploration, evolution, competition and a separate monetization layer.
 
+## Current Telegram menu
+
+The main menu exposes the core game systems directly:
+
+- 🧬 Profile
+- 🎮 Game
+- 📊 Statistics
+- 🎒 Inventory
+- 🎯 Missions
+- 🏆 Achievements
+- 🏅 Ranking
+- 👥 Community
+- 🛡 Guild
+- 💱 Trading
+- 🛒 Shop
+- 🌌 Systems hub
+- 🔔 Notifications
+- ℹ️ Help
+- 🧩 All sections
+- ❌ Hide menu
+
+`/sections` opens the complete systems navigator. Every inline callback is routed through a dedicated handler and the navigation includes a return path to the main menu.
+
 ## Stage 0
 
 The foundation currently includes:
@@ -12,6 +35,8 @@ The foundation currently includes:
 - Credits, crystals, energy, XP and level foundations
 - Environment configuration through `.env`
 - Automated pytest checks through GitHub Actions
+- Persistent game-state storage for genome, inventory, quests, exploration, combat, abilities and economy
+- Social and guild database models
 
 ## Local setup
 

@@ -7,9 +7,9 @@ from telegram.ext import ContextTypes
 
 from database.database import SessionLocal
 from database.game_state_models import PlayerGameState
+from database.models import Player
 from database.profile_models import PlayerProfile
 from database.social_models import GuildMember, GroupMember
-from database.models import Player
 from services.player_service import get_or_create_player
 from services.profile_service import get_or_create_profile
 
@@ -139,7 +139,7 @@ def _section_text(session, player: Player, profile: PlayerProfile, key: str) -> 
             "🛒 МАГАЗИН\n\n"
             f"🪙 Кредиты: {player.credits}\n"
             f"💎 Кристаллы: {player.crystals}\n\n"
-            "Магазин готов как отдельная точка меню; покупки будут изменять только игровые ресурсы."
+            "Магазин подключён как отдельный раздел экономики."
         )
 
     if key == "systems":
@@ -163,12 +163,11 @@ async def sections(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if message is None or user is None:
         return
     with SessionLocal() as session:
-        player = get_or_create_player(session, user.id, user.username)
-        profile = get_or_create_profile(session, player.id)
-        await message.reply_text(
-            "🧩 ВСЕ РАЗДЕЛЫ STARCORE\n\nВыберите нужную систему:",
-            reply_markup=sections_keyboard(),
-        )
+        get_or_create_player(session, user.id, user.username)
+    await message.reply_text(
+        "🧩 ВСЕ РАЗДЕЛЫ STARCORE\n\nВыберите нужную систему:",
+        reply_markup=sections_keyboard(),
+    )
 
 
 async def section_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -178,20 +177,28 @@ async def section_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -
         return
     await query.answer()
     action = query.data or ""
+
+    if action == "section:all":
+        await sections(update, context)
+        return
+
     if action == "section:menu":
         from handlers.menu import main_menu_keyboard
         if query.message:
             await query.message.reply_text("🎮 Главное меню STARCORE", reply_markup=main_menu_keyboard())
         return
+
     if action == "section:systems":
         from handlers.hub import hub
         await hub(update, context)
         return
+
     key = action.removeprefix("section:")
     if key not in SECTION_LABELS:
         if query.message:
             await query.message.reply_text("⚠️ Раздел временно недоступен.")
         return
+
     with SessionLocal() as session:
         player = get_or_create_player(session, user.id, user.username)
         profile = get_or_create_profile(session, player.id)

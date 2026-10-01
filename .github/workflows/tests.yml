@@ -17,9 +17,11 @@ jobs:
           python-version: "3.12"
       - name: Install dependencies
         run: pip install -r requirements.txt
+      - name: Compile Python sources
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: python -m compileall -q .
       - name: Run tests
         env:
           PYTHONPATH: ${{ github.workspace }}
         run: pytest -q
-
-# CI trigger for Stage 53 test verification

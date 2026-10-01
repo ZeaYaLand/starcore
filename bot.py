@@ -1,3 +1,6 @@
+import logging
+
+from telegram import Update
 from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes, filters
 
 from config import settings
@@ -7,6 +10,17 @@ from handlers.notifications import notifications, mark_notifications_read
 from handlers.profile import profile
 from handlers.start import start
 from handlers.stats import stats
+
+
+logging.basicConfig(
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s",
+    level=logging.INFO,
+)
+logger = logging.getLogger("starcore.bot")
+
+
+async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
+    logger.error("Unhandled Telegram update error: %r", context.error, exc_info=context.error)
 
 
 async def profile_button(update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -48,12 +62,16 @@ def build_application() -> Application:
     application.add_handler(MessageHandler(filters.Regex(r"^🔔 Уведомления$"), notifications))
     application.add_handler(MessageHandler(filters.Regex(r"^ℹ️ Помощь$"), help_button))
     application.add_handler(MessageHandler(filters.Regex(r"^❌ Скрыть меню$"), hide_menu))
+    application.add_error_handler(error_handler)
     return application
 
 
 def main() -> None:
+    logger.info("STARCORE bot starting")
     init_db()
+    logger.info("Database initialized")
     application = build_application()
+    logger.info("Telegram application built; starting polling")
     application.run_polling()
 
 

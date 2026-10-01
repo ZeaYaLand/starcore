@@ -10,20 +10,25 @@ from handlers.hub import hub, hub_callback
 from handlers.menu import hide_menu, main_menu_keyboard, menu
 from handlers.notifications import notifications, mark_notifications_read
 from handlers.profile import profile
+from handlers.sections import sections, section_callback
 from handlers.start import start
 from handlers.stats import stats
 
 logging.basicConfig(format="%(asctime)s | %(levelname)s | %(name)s | %(message)s", level=logging.INFO)
 logger = logging.getLogger("starcore.bot")
 
+
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
     logger.error("Unhandled Telegram update error: %r", context.error, exc_info=context.error)
+
 
 async def profile_button(update, context):
     await profile(update, context)
 
+
 async def play_button(update, context):
     await game(update, context)
+
 
 async def help_button(update, context):
     message = update.effective_message
@@ -33,11 +38,13 @@ async def help_button(update, context):
             "/start — запуск игры\n"
             "/starcore — центр систем STARCORE\n"
             "/menu — главное меню\n"
+            "/sections — все игровые разделы\n"
             "/profile — профиль организма\n"
             "/stats — аналитика\n"
             "/notifications — уведомления\n"
             "/game — игровой раздел"
         )
+
 
 async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
@@ -59,6 +66,7 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         await query.edit_message_reply_markup(reply_markup=None)
         await query.message.reply_text("Меню скрыто. Используйте /menu, чтобы открыть его снова.")
 
+
 def build_application() -> Application:
     if not settings.bot_token:
         raise RuntimeError("BOT_TOKEN is not configured")
@@ -67,11 +75,13 @@ def build_application() -> Application:
     application.add_handler(CommandHandler("starcore", hub))
     application.add_handler(CommandHandler("profile", profile))
     application.add_handler(CommandHandler("menu", menu))
+    application.add_handler(CommandHandler("sections", sections))
     application.add_handler(CommandHandler("stats", stats))
     application.add_handler(CommandHandler("notifications", notifications))
     application.add_handler(CommandHandler("notifications_read", mark_notifications_read))
     application.add_handler(CommandHandler("game", game))
     application.add_handler(CallbackQueryHandler(menu_callback, pattern=r"^menu:"))
+    application.add_handler(CallbackQueryHandler(section_callback, pattern=r"^section:"))
     application.add_handler(CallbackQueryHandler(hub_callback, pattern=r"^hub:"))
     application.add_handler(CallbackQueryHandler(game_callback, pattern=r"^game:"))
     application.add_handler(MessageHandler(filters.Regex(r"^🧬 Профиль$"), profile_button))
@@ -83,6 +93,7 @@ def build_application() -> Application:
     application.add_error_handler(error_handler)
     return application
 
+
 def main() -> None:
     logger.info("STARCORE bot starting")
     init_db()
@@ -90,6 +101,7 @@ def main() -> None:
     application = build_application()
     logger.info("Telegram application built; starting polling")
     application.run_polling()
+
 
 if __name__ == "__main__":
     main()

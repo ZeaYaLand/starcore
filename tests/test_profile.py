@@ -71,3 +71,6 @@ def test_profile_characteristics_are_persisted():
         assert data["characteristics"]["vitality"] == 22
         assert data["characteristics"]["intelligence"] == 19
         assert data["genome"] == "CORE-55-ALPHA"
+
+
+# Stage 55 CI verification: exercise the complete profile data contract.

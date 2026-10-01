@@ -1,11 +1,11 @@
 import logging
 
 from telegram import Update
-from telegram.ext import Application, CommandHandler, MessageHandler, ContextTypes, filters
+from telegram.ext import Application, CallbackQueryHandler, CommandHandler, MessageHandler, ContextTypes, filters
 
 from config import settings
 from database.database import init_db
-from handlers.menu import hide_menu, menu
+from handlers.menu import hide_menu, main_menu_keyboard, menu
 from handlers.notifications import notifications, mark_notifications_read
 from handlers.profile import profile
 from handlers.start import start
@@ -28,8 +28,9 @@ async def profile_button(update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def help_button(update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    if update.message is not None:
-        await update.message.reply_text(
+    message = update.effective_message
+    if message is not None:
+        await message.reply_text(
             "ℹ️ STARCORE\n\n"
             "/start — запуск игры\n"
             "/menu — открыть главное меню\n"
@@ -41,8 +42,33 @@ async def help_button(update, context: ContextTypes.DEFAULT_TYPE) -> None:
 
 
 async def play_button(update, context: ContextTypes.DEFAULT_TYPE) -> None:
-    if update.message is not None:
-        await update.message.reply_text("🎮 Игровой раздел готовится. Используйте /menu для навигации.")
+    message = update.effective_message
+    if message is not None:
+        await message.reply_text("🎮 Игровой раздел готовится. Используйте /menu для навигации.")
+
+
+async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    query = update.callback_query
+    if query is None:
+        return
+
+    await query.answer()
+    action = query.data
+
+    if action == "menu:profile":
+        await profile(update, context)
+    elif action == "menu:play":
+        await play_button(update, context)
+    elif action == "menu:stats":
+        await stats(update, context)
+    elif action == "menu:notifications":
+        await notifications(update, context)
+    elif action == "menu:help":
+        await help_button(update, context)
+    elif action == "menu:hide":
+        if query.message is not None:
+            await query.edit_message_reply_markup(reply_markup=None)
+            await query.message.reply_text("Меню скрыто. Используйте /menu, чтобы открыть его снова.")
 
 
 def build_application() -> Application:
@@ -56,6 +82,7 @@ def build_application() -> Application:
     application.add_handler(CommandHandler("stats", stats))
     application.add_handler(CommandHandler("notifications", notifications))
     application.add_handler(CommandHandler("notifications_read", mark_notifications_read))
+    application.add_handler(CallbackQueryHandler(menu_callback, pattern=r"^menu:"))
     application.add_handler(MessageHandler(filters.Regex(r"^🧬 Профиль$"), profile_button))
     application.add_handler(MessageHandler(filters.Regex(r"^🎮 Играть$"), play_button))
     application.add_handler(MessageHandler(filters.Regex(r"^📊 Статистика$"), stats))

@@ -15,7 +15,7 @@ SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
 def init_db() -> None:
     from database.models import Player
     from database.profile_models import PlayerProfile
+    from database.notification_models import Notification
 
-    # Imports register all Stage 55 profile tables before create_all().
-    _ = (Player, PlayerProfile)
+    _ = (Player, PlayerProfile, Notification)
     Base.metadata.create_all(bind=engine)

@@ -2,6 +2,8 @@ name: STARCORE Bot
 
 on:
   workflow_dispatch:
+  schedule:
+    - cron: '0 0,5,10,15,20 * * *'
   push:
     branches: [main]
     paths:
@@ -13,10 +15,14 @@ on:
       - 'requirements.txt'
       - '.github/workflows/bot.yml'
 
+concurrency:
+  group: starcore-bot
+  cancel-in-progress: true
+
 jobs:
   bot:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 290
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -53,7 +59,7 @@ jobs:
           print(f"Telegram API OK: username=@{result.get('username')}, id={result.get('id')}")
           PY
 
-      - name: Start bot with diagnostics
+      - name: Run STARCORE bot
         env:
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
-        run: timeout 60s python -u bot.py || test $? -eq 124
+        run: timeout 285m python -u bot.py || test $? -eq 124

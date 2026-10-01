@@ -24,3 +24,6 @@ def test_stage54_keyboard_is_resizable_and_persistent():
         ["📊 Статистика", "🔔 Уведомления"],
         ["ℹ️ Помощь", "❌ Скрыть меню"],
     ]
+
+
+# Stage 54 CI verification: these tests intentionally exercise the real menu builder.

@@ -1,3 +1,5 @@
+import json
+
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, Update
 from telegram.ext import ContextTypes
 
@@ -67,7 +69,13 @@ async def game_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
                 reply_markup=game_keyboard(),
             )
         elif action == "game:inventory":
-            await message.reply_text("🎒 Инвентарь пока пуст.", reply_markup=game_keyboard())
+            items = json.loads(profile.inventory or "[]")
+            if not items:
+                text = "🎒 Инвентарь пуст.\n\nИсследуй мир и выполняй действия, чтобы находить предметы."
+            else:
+                lines = [f"• {item}" for item in items]
+                text = "🎒 ИНВЕНТАРЬ\n\n" + "\n".join(lines)
+            await message.reply_text(text, reply_markup=game_keyboard())
         elif action == "game:menu":
             from handlers.menu import main_menu_keyboard
             await message.reply_text("🎮 Главное меню STARCORE", reply_markup=main_menu_keyboard())

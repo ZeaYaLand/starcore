@@ -6,6 +6,7 @@ from telegram.ext import Application, CallbackQueryHandler, CommandHandler, Mess
 from config import settings
 from database.database import init_db
 from handlers.game import game, game_callback
+from handlers.hub import hub, hub_callback
 from handlers.menu import hide_menu, main_menu_keyboard, menu
 from handlers.notifications import notifications, mark_notifications_read
 from handlers.profile import profile
@@ -19,12 +20,12 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> N
     logger.error("Unhandled Telegram update error: %r", context.error, exc_info=context.error)
 
 async def profile_button(update, context): await profile(update, context)
-async def play_button(update, context): await game(update, context)
+async def play_button(update, context): await hub(update, context)
 
 async def help_button(update, context):
     message = update.effective_message
     if message:
-        await message.reply_text("ℹ️ STARCORE\n\n/start — запуск игры\n/menu — главное меню\n/profile — профиль организма\n/stats — аналитика\n/notifications — уведомления")
+        await message.reply_text("ℹ️ STARCORE\n\n/start — запуск\n/menu — главное меню\n/starcore — все игровые системы\n/profile — профиль организма\n/stats — аналитика\n/notifications — уведомления")
 
 async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
@@ -33,7 +34,7 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     await query.answer()
     action = query.data
     if action == "menu:profile": await profile(update, context)
-    elif action == "menu:play": await game(update, context)
+    elif action == "menu:play": await hub(update, context)
     elif action == "menu:stats": await stats(update, context)
     elif action == "menu:notifications": await notifications(update, context)
     elif action == "menu:help": await help_button(update, context)
@@ -52,7 +53,9 @@ def build_application() -> Application:
     application.add_handler(CommandHandler("notifications", notifications))
     application.add_handler(CommandHandler("notifications_read", mark_notifications_read))
     application.add_handler(CommandHandler("game", game))
+    application.add_handler(CommandHandler("starcore", hub))
     application.add_handler(CallbackQueryHandler(menu_callback, pattern=r"^menu:"))
+    application.add_handler(CallbackQueryHandler(hub_callback, pattern=r"^hub:"))
     application.add_handler(CallbackQueryHandler(game_callback, pattern=r"^game:"))
     application.add_handler(MessageHandler(filters.Regex(r"^🧬 Профиль$"), profile_button))
     application.add_handler(MessageHandler(filters.Regex(r"^🎮 Играть$"), play_button))

@@ -19,13 +19,25 @@ logger = logging.getLogger("starcore.bot")
 async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> None:
     logger.error("Unhandled Telegram update error: %r", context.error, exc_info=context.error)
 
-async def profile_button(update, context): await profile(update, context)
-async def play_button(update, context): await hub(update, context)
+async def profile_button(update, context):
+    await profile(update, context)
+
+async def play_button(update, context):
+    await game(update, context)
 
 async def help_button(update, context):
     message = update.effective_message
     if message:
-        await message.reply_text("ℹ️ STARCORE\n\n/start — запуск\n/menu — главное меню\n/starcore — все игровые системы\n/profile — профиль организма\n/stats — аналитика\n/notifications — уведомления")
+        await message.reply_text(
+            "ℹ️ STARCORE\n\n"
+            "/start — запуск игры\n"
+            "/starcore — центр систем STARCORE\n"
+            "/menu — главное меню\n"
+            "/profile — профиль организма\n"
+            "/stats — аналитика\n"
+            "/notifications — уведомления\n"
+            "/game — игровой раздел"
+        )
 
 async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     query = update.callback_query
@@ -33,11 +45,16 @@ async def menu_callback(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
         return
     await query.answer()
     action = query.data
-    if action == "menu:profile": await profile(update, context)
-    elif action == "menu:play": await hub(update, context)
-    elif action == "menu:stats": await stats(update, context)
-    elif action == "menu:notifications": await notifications(update, context)
-    elif action == "menu:help": await help_button(update, context)
+    if action == "menu:profile":
+        await profile(update, context)
+    elif action == "menu:play":
+        await game(update, context)
+    elif action == "menu:stats":
+        await stats(update, context)
+    elif action == "menu:notifications":
+        await notifications(update, context)
+    elif action == "menu:help":
+        await help_button(update, context)
     elif action == "menu:hide" and query.message:
         await query.edit_message_reply_markup(reply_markup=None)
         await query.message.reply_text("Меню скрыто. Используйте /menu, чтобы открыть его снова.")
@@ -47,13 +64,13 @@ def build_application() -> Application:
         raise RuntimeError("BOT_TOKEN is not configured")
     application = Application.builder().token(settings.bot_token).build()
     application.add_handler(CommandHandler("start", start))
+    application.add_handler(CommandHandler("starcore", hub))
     application.add_handler(CommandHandler("profile", profile))
     application.add_handler(CommandHandler("menu", menu))
     application.add_handler(CommandHandler("stats", stats))
     application.add_handler(CommandHandler("notifications", notifications))
     application.add_handler(CommandHandler("notifications_read", mark_notifications_read))
     application.add_handler(CommandHandler("game", game))
-    application.add_handler(CommandHandler("starcore", hub))
     application.add_handler(CallbackQueryHandler(menu_callback, pattern=r"^menu:"))
     application.add_handler(CallbackQueryHandler(hub_callback, pattern=r"^hub:"))
     application.add_handler(CallbackQueryHandler(game_callback, pattern=r"^game:"))
@@ -74,4 +91,5 @@ def main() -> None:
     logger.info("Telegram application built; starting polling")
     application.run_polling()
 
-if __name__ == "__main__": main()
+if __name__ == "__main__":
+    main()
